@@ -1,0 +1,18 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+#weather_details{
+    display: none;
+}
+.weather_active{
+    display: block !important;
+}
+
+body{
+    background: #23404B;
+}
+.card{
+    background-image: linear-gradient(to right, #D6C5A0, #425453);
+}
