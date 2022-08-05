@@ -2,7 +2,7 @@
 let result_container = document.querySelector('#result_container')
 
 const API_KEY = "84f751899f1ce4d738e0225efb8b5c1c"
-let weather_URL = "https://openweathermap.org/data/2.5/weather"
+let weather_URL = "https://api.openweathermap.org/data/2.5/weather"
 let resCountry_URL = "https://raw.githubusercontent.com/rvsp/restcountries-json-data/master/res-countries.json"
 let resCountryImage_Url = "https://cdn.jsdelivr.net/npm/country-flag-emoji-json@2.0.0/dist/images/"
 
@@ -16,9 +16,13 @@ let createCard = (data, weather) => {
 
     let _weather = ''
 
-    weather.weather.forEach(w => _weather += w.description + ' ')
+    let verify_weather = weather.cod != 400
+
+    if (verify_weather) weather.weather.forEach(w => _weather += w.description + ' ')
 
     _weather.trim()
+
+
 
     container.innerHTML = `
         <div class="card" style="width:300px">
@@ -36,10 +40,10 @@ let createCard = (data, weather) => {
                 <div class="card-body" id='weather_details'>
                     <span class="card-text text-dark bg-warning pb-2 pt-2 pl-5 pr-5">Weather Details</span>
                     <p class="card-text mt-4">Weather: ${_weather}</p>
-                    <p class="card-text">Temperature: ${weather.main.temp}°C</p>
-                    <p class="card-text">Humidity: ${weather.main.humidity}%rh</p>
-                    <p class="card-text">Pressure: ${weather.main.pressure}Pa</p>
-                    <p class="card-text">Wind Speed: ${weather.wind.speed} Kmph</p>
+                    <p class="card-text">Temperature: ${verify_weather ? weather.main.temp : ''}°C</p>
+                    <p class="card-text">Humidity: ${verify_weather ? weather.main.humidity : ''}%rh</p>
+                    <p class="card-text">Pressure: ${verify_weather ? weather.main.pressure : ''}Pa</p>
+                    <p class="card-text">Wind Speed: ${verify_weather ? weather.wind.speed : ''} Kmph</p>
                 </div>  
                 <button id='weather_btn'class="btn btn-outline-light">Click for Weather</button>
             </div>
@@ -64,25 +68,27 @@ async function getCountryData() {
 
     return res
 }
-async function getWeatherData() {
+async function getWeatherData(latlng) {
 
     // console.log(weather_URL + `?lat=${lat}&lon=${lng}&appid=${API_KEY}`);
-    let res = await fetch('https://openweathermap.org/data/2.5/weather?id=2643743&appid=439d4b804bc8187953eb36d2a8c26a02')
+    let URl = weather_URL + `?lat=${latlng[0]}&lon=${latlng[1]}&appid=${API_KEY}`
+    let res = await fetch(URl)
 
     res = await res.json()
 
     return res
+
 }
 
 async function init() {
 
     let countryData = await getCountryData()
-    let weatherData = await getWeatherData()
-
-    console.log(weatherData);
 
     if (!countryData.length) return
     countryData.forEach(async cunt => {
+
+        let weatherData = await getWeatherData(cunt.latlng)
+
 
         let container = createCard(cunt, weatherData)
 
